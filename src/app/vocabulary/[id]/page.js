@@ -14,15 +14,17 @@ import {
   Box,
   Button,
   Dialog,
+  Popover,
+  TextArea,
 } from "@radix-ui/themes";
-import Link from "next/link";
-import Image from "next/image";
 import {
   deleteVocabulary,
-  getAllVocabulary,
   getVocabularyById,
 } from "@/services/vocabularyService";
-import { getAllExamples } from "@/services/exampleServices";
+import { getExamplesByVocabularyId } from "@/services/exampleServices";
+import { ChatBubbleIcon } from "@radix-ui/react-icons";
+import { getCommentsByVocabularyId } from "@/services/commentService";
+import Comments from "@/components/Comments";
 
 export default function Home() {
   const { user, isAdmin } = useAuth();
@@ -32,32 +34,42 @@ export default function Home() {
   const params = useParams();
   const vocabularyId = params.id;
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [comments, setComments] = useState([]);
 
   const fetchData = async () => {
     const vocabularyData = await getVocabularyById(vocabularyId);
     setVocabulary(vocabularyData);
-    const exampleData = await getAllExamples();
+    const exampleData = await getExamplesByVocabularyId(vocabularyId);
     setExamples(exampleData);
+    const commentData = await getCommentsByVocabularyId(vocabularyId);
+    setComments(commentData);
   };
 
   useEffect(() => {
     fetchData();
-  }, [user, router, vocabularyId]);
+  }, [vocabularyId]);
 
   const handleDelete = async () => {
     try {
       await deleteVocabulary(vocabularyId);
-      router.push('/vocabulary');
+      router.push("/vocabulary");
     } catch (err) {
-      console.error('Error deleting vocabulary:', err);
-      setError('Failed to delete vocabulary. Please try again.');
+      console.error("Error deleting vocabulary:", err);
+      setError("Failed to delete vocabulary. Please try again.");
       setIsDeleteDialogOpen(false);
     }
   };
+  
+  const testBtn = () => {
+    console.log(comments)
+  }
 
   const vocabularyContent = (
     <>
       <Navbar />
+      <Button onClick={() => testBtn()}>
+        Test
+      </Button>
       <Container size="4" py="9">
         <Flex direction="column" gap="6" align="center">
           <Heading size="9" mb="2">
@@ -65,24 +77,76 @@ export default function Home() {
           </Heading>
           <Text size="6">{vocabulary.translation}</Text>
           {isAdmin() ? (
-            <Button color="red" onClick={() => setIsDeleteDialogOpen(true)}>Delete</Button>
+            <Button color="red" onClick={() => setIsDeleteDialogOpen(true)}>
+              Delete
+            </Button>
           ) : (
             <></>
           )}
-          
+
           <Box>
             <Heading size="8" mb="2">
               Examples
             </Heading>
-            <Button onClick={() => router.push('/examples/add')}>Add an Example</Button>
           </Box>
         </Flex>
       </Container>
-      <Dialog.Root open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+
+      {examples.map((example) => (
+        <Flex key={example.id} direction="row" gap="6" align="center">
+          <iframe width="420" height="315" src={example.videoUrl}></iframe>
+          <Flex direction="column" gap="6" align="center">
+            <Text>Subtitle: {example.subtitle}</Text>
+            <Text>Translation: {example.englishSubtitle}</Text>
+          </Flex>
+        </Flex>
+      ))}
+
+      <Container>
+        <Flex direction="column" gap="6" align="center">
+          <Heading size="8" mb="2">
+            User Comments
+          </Heading>
+          <Card>
+            <Comments 
+              comments = {comments}
+            />
+          </Card>
+          <Popover.Root>
+            <Popover.Trigger>
+              <Button variant="soft">
+                <ChatBubbleIcon width="16" height="16" />
+                Comment
+              </Button>
+            </Popover.Trigger>
+            <Popover.Content width="360px">
+              <Flex gap="3">
+                <Box flexGrow="1">
+                  <TextArea
+                    placeholder="Write a comment…"
+                    style={{ height: 80 }}
+                  />
+                  <Flex gap="3" mt="3" justify="between">
+                    <Popover.Close>
+                      <Button size="1">Comment</Button>
+                    </Popover.Close>
+                  </Flex>
+                </Box>
+              </Flex>
+            </Popover.Content>
+          </Popover.Root>
+        </Flex>
+      </Container>
+
+      <Dialog.Root
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <Dialog.Content>
           <Dialog.Title>Delete Vocabulary</Dialog.Title>
           <Dialog.Description size="2" mb="4">
-            Are you sure you want to delete this vocabulary term? This action cannot be undone.
+            Are you sure you want to delete this vocabulary term? This action
+            cannot be undone.
           </Dialog.Description>
 
           <Flex gap="3" mt="4" justify="end">

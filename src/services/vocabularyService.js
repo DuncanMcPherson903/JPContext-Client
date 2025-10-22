@@ -12,6 +12,10 @@ export const getVocabularyById = async (vocabularyId) => {
   return get(`/vocabulary/${vocabularyId}`);
 };
 
+export const getVocabularyByExampleId = async (exampleId) => {
+  return get(`/examples/${exampleId}/vocabulary`);
+}
+
 export const createVocabulary = async (vocabularyData) => {
   return post('/vocabulary', vocabularyData);
 };
@@ -24,5 +28,6 @@ export default {
   getAllVocabulary,
   getVocabularyById,
   createVocabulary,
-  deleteVocabulary
+  deleteVocabulary,
+  getVocabularyByExampleId
 };

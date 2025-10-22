@@ -57,7 +57,6 @@ export default function Home() {
                   <Flex direction="column" gap="3">
                     <Heading size="4">{vocabulary.term}</Heading>
                     <Text>{vocabulary.translation}</Text>
-                    <Button color="red" onClick={handleDelete}>Delete</Button>
                   </Flex>
                 </Card>
               </Link>

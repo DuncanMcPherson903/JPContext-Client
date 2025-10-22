@@ -33,14 +33,15 @@ export default function AddExample() {
     videoUrl: "",
     subtitle: "",
     englishSubtitle: "",
+    vocabularyId: [],
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [searchResultCards, setSearchResultCards] = useState("");
   const [addedVocabCards, setAddedVocabCards] = useState("");
   const [addedVocab, setAddedVocab] = useState([]);
-
-  useEffect(() => {}, [addedVocab]);
+  const [vocabIdList, setVocabIdList] = useState([]);
+  let eventData;
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -52,6 +53,7 @@ export default function AddExample() {
 
   const handleVocabSearch = async (e) => {
     const { value } = e.target;
+    eventData = e;
     const searchResults = await searchAllVocabulary(value);
     await setSearchResultCards(() => {
       if (value !== "") {
@@ -74,17 +76,43 @@ export default function AddExample() {
     });
   };
 
+
   const addVocabToForm = async (vocabId) => {
+    let tempVocabIdList = vocabIdList;
+    tempVocabIdList.push(vocabId);
+    setVocabIdList(tempVocabIdList);
+    console.log(vocabIdList);
     let vocabList = addedVocab;
     vocabList.push(await getVocabularyById(vocabId));
-    await setAddedVocab(vocabList);
-    await setAddedVocabCards(() => {
-      return addedVocab.map((result) => (
+    setAddedVocab(vocabList);
+    displayAddedVocabCards(vocabList);
+    handleVocabSearch(eventData);
+  };
+
+  const removeVocabFromForm = (vocabId) => {
+    let tempVocabIdList = vocabIdList;
+    tempVocabIdList = tempVocabIdList.filter((item) => item !== vocabId);
+    setVocabIdList(tempVocabIdList);
+    let vocabList = addedVocab;
+    vocabList = vocabList.filter((item) => item.id !== vocabId);
+    setAddedVocab(vocabList);
+    console.log(vocabList);
+    console.log(addedVocab);
+    displayAddedVocabCards(vocabList);
+    setSearchResultCards(<></>)
+  };
+
+  const displayAddedVocabCards = (vocabList) => {
+    setAddedVocabCards(() => {
+      return vocabList.map((result) => (
         <Card key={result.id} style={{ flex: "1 1 100px" }}>
           <Flex direction="column" gap="3">
             <Heading size="4">{result.term}</Heading>
             <Text>{result.translation}</Text>
-            <Button type="button" onClick={() => removeVocabFromForm(result.id)}>
+            <Button
+              type="button"
+              onClick={() => removeVocabFromForm(result.id)}
+            >
               Remove
             </Button>
           </Flex>
@@ -93,12 +121,8 @@ export default function AddExample() {
     });
   };
 
-  const removeVocabFromForm = async (vocabId) => {
-
-  }
-
   const addedVocabIncludesSearchResult = (result) => {
-    const foundVocab = addedVocab.find(vocab => vocab.id === result.id);
+    const foundVocab = addedVocab.find((vocab) => vocab.id === result.id);
     if (foundVocab == undefined) {
       return false;
     } else {
@@ -112,8 +136,11 @@ export default function AddExample() {
     setIsLoading(true);
 
     try {
-      const exampleData = { ...formData };
-      const newExample = await createExample(exampleData);
+      console.log(vocabIdList);
+      let tempFormData = formData;
+      tempFormData = { ...tempFormData, vocabularyId: vocabIdList}
+      console.log(tempFormData);
+      const newExample = await createExample(tempFormData);
       router.push(`/examples/${newExample.id}`);
     } catch (err) {
       console.error("Error adding example:", err);
@@ -123,7 +150,7 @@ export default function AddExample() {
   };
 
   const testBtn = async () => {
-    console.log(addedVocab);
+    console.log(vocabIdList);
   };
 
   const addExampleContent = (
@@ -212,14 +239,14 @@ export default function AddExample() {
                   <Popover.Trigger>
                     <Button variant="soft">
                       <PlusIcon width="16" height="16" />
-                      Add Vocabulary
+                      Add Example
                     </Button>
                   </Popover.Trigger>
                   <Popover.Content width="360px">
                     <TextField.Root
-                      id="vocabulary"
+                      id="example"
                       onChange={handleVocabSearch}
-                      placeholder="Search vocabulary…"
+                      placeholder="Search Examples…"
                     ></TextField.Root>
                     <ScrollArea
                       type="always"
