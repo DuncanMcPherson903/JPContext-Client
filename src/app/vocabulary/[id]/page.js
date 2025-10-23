@@ -128,14 +128,10 @@ export default function Home() {
     fetchData();
   }, [vocabularyId]);
 
-  const testBtn = () => {
-    console.log(editingCommentText);
-  };
 
   const vocabularyContent = (
     <>
       <Navbar />
-      <Button onClick={() => testBtn()}>Test</Button>
       <Container size="4" py="9">
         <Flex direction="column" gap="6" align="center">
           <Heading size="9" mb="2">

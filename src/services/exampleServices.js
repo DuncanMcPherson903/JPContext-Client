@@ -20,14 +20,10 @@ export const createExample = async (exampleData) => {
   return post('/examples', exampleData);
 };
 
-export const deleteExample = async (exampleId) => {
-  return del(`/examples/${exampleId}`);
+export const updateExample = async (exampleId, exampleData) => {
+  return put(`/examples/${exampleId}`, exampleData);
 };
 
-export default {
-  getAllExamples,
-  getExampleById,
-  createExample,
-  deleteExample,
-  getExamplesByVocabularyId
+export const deleteExample = async (exampleId) => {
+  return del(`/examples/${exampleId}`);
 };

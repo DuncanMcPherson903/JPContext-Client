@@ -17,14 +17,19 @@ import {
   Popover,
   ScrollArea,
 } from "@radix-ui/themes";
-import { createExample, getExampleById } from "@/services/exampleServices";
+import { createExample, getExampleById, updateExample } from "@/services/exampleServices";
 import {
+  getVocabularyByExampleId,
   getVocabularyById,
   searchAllVocabulary,
 } from "@/services/vocabularyService";
 import { PlusIcon } from "@radix-ui/react-icons";
+import {
+  AddedVocabCards,
+  SearchResultCards,
+} from "@/components/ExampleAddEditCards";
 
-export default function UpdateExample() {
+export default function AddExample() {
   const { user } = useAuth();
   const router = useRouter();
   const params = useParams();
@@ -39,13 +44,12 @@ export default function UpdateExample() {
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [searchResultCards, setSearchResultCards] = useState("");
-  const [addedVocabCards, setAddedVocabCards] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
   const [addedVocab, setAddedVocab] = useState([]);
   const [vocabIdList, setVocabIdList] = useState([]);
-  let eventData;
 
   const fetchData = async () => {
+    const vocabulary = await getVocabularyByExampleId(exampleId);
     const exampleData = await getExampleById(exampleId);
 
     setFormData({
@@ -54,13 +58,16 @@ export default function UpdateExample() {
       videoUrl: exampleData.videoUrl,
       subtitle: exampleData.subtitle,
       englishSubtitle: exampleData.englishSubtitle,
-      vocabularyId: exampleData.vocabularyId,
+      vocabularyId: vocabulary,
     });
+
+    // vocabulary.forEach(term => {
+    //   addVocabToForm(term.id);
+    // });
   };
 
   useEffect(() => {
     fetchData();
-    displayAddedVocabCards(formData.vocabularyId);
   }, []);
 
   const handleChange = (e) => {
@@ -73,68 +80,18 @@ export default function UpdateExample() {
 
   const handleVocabSearch = async (e) => {
     const { value } = e.target;
-    eventData = e;
-    const searchResults = await searchAllVocabulary(value);
-    await setSearchResultCards(() => {
-      if (value !== "") {
-        return searchResults.map((result) => (
-          <Card key={result.id} style={{ flex: "1 1 300px" }}>
-            <Flex direction="column" gap="3">
-              <Heading size="4">{result.term}</Heading>
-              <Text>{result.translation}</Text>
-              {addedVocabIncludesSearchResult(result) ? (
-                <></>
-              ) : (
-                <Button type="button" onClick={() => addVocabToForm(result.id)}>
-                  Add
-                </Button>
-              )}
-            </Flex>
-          </Card>
-        ));
-      }
-    });
+    setSearchResults(await searchAllVocabulary(value));
   };
 
   const addVocabToForm = async (vocabId) => {
-    let tempVocabIdList = vocabIdList;
-    tempVocabIdList.push(vocabId);
-    setVocabIdList(tempVocabIdList);
-    let vocabList = addedVocab;
-    vocabList.push(await getVocabularyById(vocabId));
-    setAddedVocab(vocabList);
-    displayAddedVocabCards(vocabList);
-    handleVocabSearch(eventData);
+    setVocabIdList((prev) => [...prev, vocabId]);
+    let newVocabList = await getVocabularyById(vocabId);
+    setAddedVocab((prev) => [...prev, newVocabList]);
   };
 
   const removeVocabFromForm = (vocabId) => {
-    let tempVocabIdList = vocabIdList;
-    tempVocabIdList = tempVocabIdList.filter((item) => item !== vocabId);
-    setVocabIdList(tempVocabIdList);
-    let vocabList = addedVocab;
-    vocabList = vocabList.filter((item) => item.id !== vocabId);
-    setAddedVocab(vocabList);
-    displayAddedVocabCards(vocabList);
-    setSearchResultCards(<></>);
-  };
-
-  const displayAddedVocabCards = (vocabList) => {
-    setAddedVocabCards(() => {
-      return vocabList.map((result) => (
-        <Card key={result.id} style={{ flex: "1 1 100px" }}>
-          <Flex direction="column" gap="3">
-            <Heading size="4">{result.term}</Heading>
-            <Text>{result.translation}</Text>
-            <Button
-              type="button"
-              onClick={() => removeVocabFromForm(result.id)}
-            >
-              Remove
-            </Button>
-          </Flex>
-        </Card>
-      ));
-    });
+    setVocabIdList((prev) => [...prev].filter((item) => item !== vocabId));
+    setAddedVocab((prev) => [...prev].filter((item) => item.id !== vocabId));
   };
 
   const addedVocabIncludesSearchResult = (result) => {
@@ -152,12 +109,10 @@ export default function UpdateExample() {
     setIsLoading(true);
 
     try {
-      // console.log(vocabIdList);
       let tempFormData = formData;
       tempFormData = { ...tempFormData, vocabularyId: vocabIdList };
-      // console.log(tempFormData);
-      const newExample = await createExample(tempFormData);
-      router.push(`/examples/${newExample.id}`);
+      const updatedExample = await updateExample(exampleId, tempFormData);
+      router.push(`/examples/${updatedExample.id}`);
     } catch (err) {
       console.error("Error adding example:", err);
       setError("Failed to add example. Please try again.");
@@ -165,142 +120,139 @@ export default function UpdateExample() {
     }
   };
 
-  const testBtn = () => {
-    console.log(formData)
-  }
-
-  const addExampleContent = (
-    <>
-      <Navbar />
-      <Container size="2" py="9">
-        <Card>
-          <Flex direction="column" gap="5" p="4">
-            <Heading size="6" align="center">
-              Add a New Example
-            </Heading>
-
-            {error && (
-              <Text color="red" size="2">
-                {error}
-              </Text>
-            )}
-
-            <form onSubmit={handleSubmit}>
-              <Flex direction="column" gap="4">
-                <Box>
-                  <Text as="label" size="2" mb="1" htmlFor="title">
-                    Title
-                  </Text>
-                  <TextField.Root
-                    id="title"
-                    value={formData.title}
-                    onChange={handleChange}
-                    placeholder="Enter title"
-                    required
-                  />
-                </Box>
-
-                <Box>
-                  <Text as="label" size="2" mb="1" htmlFor="source">
-                    Source
-                  </Text>
-                  <TextField.Root
-                    id="source"
-                    value={formData.source}
-                    onChange={handleChange}
-                    placeholder="Enter name of source"
-                    required
-                  />
-                </Box>
-
-                <Box>
-                  <Text as="label" size="2" mb="1" htmlFor="videoUrl">
-                    Video URL
-                  </Text>
-                  <TextField.Root
-                    id="videoUrl"
-                    value={formData.videoUrl}
-                    onChange={handleChange}
-                    placeholder="Enter video URL"
-                  />
-                </Box>
-
-                <Box>
-                  <Text as="label" size="2" mb="1" htmlFor="subtitle">
-                    Subtitle
-                  </Text>
-                  <TextField.Root
-                    id="subtitle"
-                    value={formData.subtitle}
-                    onChange={handleChange}
-                    placeholder="Enter Japanese subtitle"
-                    required
-                  />
-                </Box>
-
-                <Box>
-                  <Text as="label" size="2" mb="1" htmlFor="englishSubtitle">
-                    English Subtitle
-                  </Text>
-                  <TextField.Root
-                    id="englishSubtitle"
-                    value={formData.englishSubtitle}
-                    onChange={handleChange}
-                    placeholder="Enter English subtitle"
-                    required
-                  />
-                </Box>
-
-                <Popover.Root>
-                  <Popover.Trigger>
-                    <Button variant="soft">
-                      <PlusIcon width="16" height="16" />
-                      Add Vocabulary
-                    </Button>
-                  </Popover.Trigger>
-                  <Popover.Content width="360px">
-                    <TextField.Root
-                      id="example"
-                      onChange={handleVocabSearch}
-                      placeholder="Search vocabulary…"
-                    ></TextField.Root>
-                    <ScrollArea
-                      type="always"
-                      scrollbars="vertical"
-                      style={{ height: 180 }}
-                    >
-                      {searchResultCards}
-                    </ScrollArea>
-                  </Popover.Content>
-                </Popover.Root>
-
-                <ScrollArea type="always" scrollbars="vertical">
-                  {addedVocabCards}
-                </ScrollArea>
-                <Flex gap="3" mt="4">
-                  <Button type="submit" disabled={isLoading}>
-                    {isLoading ? "Adding Example..." : "Add Example"}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="soft"
-                    onClick={() => router.push("/examples")}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="button" onClick={() => testBtn()}>Test</Button>
-                </Flex>
-              </Flex>
-            </form>
-          </Flex>
-        </Card>
-      </Container>
-    </>
-  );
-
   return (
     <FeatureErrorBoundary featureName="AddExample">
-      {addExampleContent}
+      <>
+        <Navbar />
+        <Container size="2" py="9">
+          <Card>
+            <Flex direction="column" gap="5" p="4">
+              <Heading size="6" align="center">
+                Add a New Example
+              </Heading>
+
+              {error && (
+                <Text color="red" size="2">
+                  {error}
+                </Text>
+              )}
+
+              <form onSubmit={handleSubmit}>
+                <Flex direction="column" gap="4">
+                  <Box>
+                    <Text as="label" size="2" mb="1" htmlFor="title">
+                      Title
+                    </Text>
+                    <TextField.Root
+                      id="title"
+                      value={formData.title}
+                      onChange={handleChange}
+                      placeholder="Enter title"
+                      required
+                    />
+                  </Box>
+
+                  <Box>
+                    <Text as="label" size="2" mb="1" htmlFor="source">
+                      Source
+                    </Text>
+                    <TextField.Root
+                      id="source"
+                      value={formData.source}
+                      onChange={handleChange}
+                      placeholder="Enter name of source"
+                      required
+                    />
+                  </Box>
+
+                  <Box>
+                    <Text as="label" size="2" mb="1" htmlFor="videoUrl">
+                      Video URL
+                    </Text>
+                    <TextField.Root
+                      id="videoUrl"
+                      value={formData.videoUrl}
+                      onChange={handleChange}
+                      placeholder="Enter video URL"
+                    />
+                  </Box>
+
+                  <Box>
+                    <Text as="label" size="2" mb="1" htmlFor="subtitle">
+                      Subtitle
+                    </Text>
+                    <TextField.Root
+                      id="subtitle"
+                      value={formData.subtitle}
+                      onChange={handleChange}
+                      placeholder="Enter Japanese subtitle"
+                      required
+                    />
+                  </Box>
+
+                  <Box>
+                    <Text as="label" size="2" mb="1" htmlFor="englishSubtitle">
+                      English Subtitle
+                    </Text>
+                    <TextField.Root
+                      id="englishSubtitle"
+                      value={formData.englishSubtitle}
+                      onChange={handleChange}
+                      placeholder="Enter English subtitle"
+                      required
+                    />
+                  </Box>
+
+                  <Popover.Root>
+                    <Popover.Trigger>
+                      <Button variant="soft">
+                        <PlusIcon width="16" height="16" />
+                        Add Vocabulary
+                      </Button>
+                    </Popover.Trigger>
+                    <Popover.Content width="360px">
+                      <TextField.Root
+                        id="example"
+                        onChange={handleVocabSearch}
+                        placeholder="Search vocabulary…"
+                      ></TextField.Root>
+                      <ScrollArea
+                        type="always"
+                        scrollbars="vertical"
+                        style={{ height: 180 }}
+                      >
+                        <SearchResultCards
+                          searchResults={searchResults}
+                          addedVocabCheck={addedVocabIncludesSearchResult}
+                          addVocabFunction={addVocabToForm}
+                        />
+                      </ScrollArea>
+                    </Popover.Content>
+                  </Popover.Root>
+                  <ScrollArea type="always" scrollbars="vertical">
+                    <AddedVocabCards
+                      vocabList={addedVocab}
+                      removeVocab={removeVocabFromForm}
+                    />
+                  </ScrollArea>
+                  <Flex gap="3" mt="4">
+                    <Button type="submit" disabled={isLoading}>
+                      {isLoading ? "Updating Example..." : "Update Example"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="soft"
+                      onClick={() => router.push("/examples")}
+                    >
+                      Cancel
+                    </Button>
+                  </Flex>
+                </Flex>
+              </form>
+            </Flex>
+          </Card>
+        </Container>
+      </>
     </FeatureErrorBoundary>
   );
 }
