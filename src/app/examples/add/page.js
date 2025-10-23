@@ -37,6 +37,7 @@ export default function AddExample() {
     videoUrl: "",
     subtitle: "",
     englishSubtitle: "",
+    userProfileId: 0,
     vocabularyId: [],
   });
   const [error, setError] = useState("");
@@ -85,7 +86,7 @@ export default function AddExample() {
 
     try {
       let tempFormData = formData;
-      tempFormData = { ...tempFormData, vocabularyId: vocabIdList };
+      tempFormData = { ...tempFormData, vocabularyId: vocabIdList, userProfileId: user.id };
       const newExample = await createExample(tempFormData);
       router.push(`/examples/${newExample.id}`);
     } catch (err) {

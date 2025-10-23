@@ -11,13 +11,10 @@ import { Container, Heading, Text, Flex, Card, TextField, Button, Box, Grid } fr
 
 export default function Register() {
   const [formData, setFormData] = useState({
+    username: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    firstName: '',
-    lastName: '',
-    address: '',
-    phone: ''
+    confirmPassword: ''
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -49,7 +46,7 @@ export default function Register() {
       const { confirmPassword, ...registrationData } = formData;
       const userData = await register(registrationData);
       login(userData);
-      router.push('/pets');
+      router.push('/');
     } catch (err) {
       console.error('Registration error:', err);
       setError('Registration failed. Please try again.');
@@ -74,74 +71,31 @@ export default function Register() {
 
             <form onSubmit={handleSubmit}>
               <Flex direction="column" gap="4">
-                <Grid columns="2" gap="4">
                   <Box>
-                    <Text as="label" size="2" mb="1" htmlFor="firstName">
-                      First Name
+                    <Text as="label" size="2" mb="1" htmlFor="username">
+                      Username
                     </Text>
                     <TextField.Root
-                      id="firstName"
-                      value={formData.firstName}
+                      id="username"
+                      value={formData.username}
                       onChange={handleChange}
-                      placeholder="Enter your first name"
+                      placeholder="Enter your username"
                       required
                     />
                   </Box>
 
                   <Box>
-                    <Text as="label" size="2" mb="1" htmlFor="lastName">
-                      Last Name
+                    <Text as="label" size="2" mb="1" htmlFor="email">
+                      Email
                     </Text>
                     <TextField.Root
-                      id="lastName"
-                      value={formData.lastName}
+                      id="email"
+                      value={formData.email}
                       onChange={handleChange}
-                      placeholder="Enter your last name"
+                      placeholder="Enter your email"
                       required
                     />
                   </Box>
-                </Grid>
-
-                <Box>
-                  <Text as="label" size="2" mb="1" htmlFor="email">
-                    Email
-                  </Text>
-                  <TextField.Root
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="Enter your email"
-                    required
-                  />
-                </Box>
-
-                <Box>
-                  <Text as="label" size="2" mb="1" htmlFor="phone">
-                    Phone Number
-                  </Text>
-                  <TextField.Root
-                    id="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder="Enter your phone number"
-                    required
-                  />
-                </Box>
-
-                <Box>
-                  <Text as="label" size="2" mb="1" htmlFor="address">
-                    Address
-                  </Text>
-                  <TextField.Root
-                    id="address"
-                    value={formData.address}
-                    onChange={handleChange}
-                    placeholder="Enter your address"
-                    required
-                  />
-                </Box>
 
                 <Grid columns="2" gap="4">
                   <Box>

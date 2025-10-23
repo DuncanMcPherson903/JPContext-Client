@@ -23,10 +23,7 @@ export default function Profile() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     email: "",
-    firstName: "",
-    lastName: "",
-    address: "",
-    phone: "",
+    username: "",
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -37,10 +34,7 @@ export default function Profile() {
     if (user) {
       setFormData({
         email: user.email || "",
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
-        address: user.address || "",
-        phone: user.phone || "",
+        username: user.username || "",
       });
     } else {
       // Redirect to login if not authenticated
@@ -106,33 +100,18 @@ export default function Profile() {
 
             <form onSubmit={handleSubmit}>
               <Flex direction="column" gap="4">
-                <Grid columns="2" gap="4">
                   <Box>
-                    <Text as="label" size="2" mb="1" htmlFor="firstName">
-                      First Name
+                    <Text as="label" size="2" mb="1" htmlFor="username">
+                      Username
                     </Text>
                     <TextField.Root
-                      id="firstName"
-                      value={formData.firstName}
+                      id="username"
+                      value={formData.username}
                       onChange={handleChange}
-                      placeholder="Enter your first name"
+                      placeholder="Enter your Username"
                       required
                     />
                   </Box>
-
-                  <Box>
-                    <Text as="label" size="2" mb="1" htmlFor="lastName">
-                      Last Name
-                    </Text>
-                    <TextField.Root
-                      id="lastName"
-                      value={formData.lastName}
-                      onChange={handleChange}
-                      placeholder="Enter your last name"
-                      required
-                    />
-                  </Box>
-                </Grid>
 
                 <Box>
                   <Text as="label" size="2" mb="1" htmlFor="email">
@@ -144,33 +123,6 @@ export default function Profile() {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="Enter your email"
-                    required
-                  />
-                </Box>
-
-                <Box>
-                  <Text as="label" size="2" mb="1" htmlFor="phone">
-                    Phone Number
-                  </Text>
-                  <TextField.Root
-                    id="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder="Enter your phone number"
-                    required
-                  />
-                </Box>
-
-                <Box>
-                  <Text as="label" size="2" mb="1" htmlFor="address">
-                    Address
-                  </Text>
-                  <TextField.Root
-                    id="address"
-                    value={formData.address}
-                    onChange={handleChange}
-                    placeholder="Enter your address"
                     required
                   />
                 </Box>

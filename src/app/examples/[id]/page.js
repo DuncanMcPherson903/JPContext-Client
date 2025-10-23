@@ -61,7 +61,7 @@ export default function Home() {
           <Heading size="9" mb="2">
             {example.title}
           </Heading>
-          {isAdmin() ? (
+          {isAdmin() || user?.id == example.userProfileId ? (
             <>
               <Button
                 onClick={() => router.push(`/examples/${exampleId}/edit`)}
