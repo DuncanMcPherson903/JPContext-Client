@@ -20,6 +20,10 @@ export const createVocabulary = async (vocabularyData) => {
   return post('/vocabulary', vocabularyData);
 };
 
+export const updateVocabulary = async (vocabularyId, vocabularyData) => {
+  return put(`/vocabulary/${vocabularyId}`, vocabularyData);
+};
+
 export const deleteVocabulary = async (vocabularyId) => {
   return del(`/vocabulary/${vocabularyId}`);
 };

@@ -62,9 +62,16 @@ export default function Home() {
             {example.title}
           </Heading>
           {isAdmin() ? (
-            <Button color="red" onClick={() => setIsDeleteDialogOpen(true)}>
-              Delete
-            </Button>
+            <>
+              <Button
+                onClick={() => router.push(`/examples/${exampleId}/edit`)}
+              >
+                Edit
+              </Button>
+              <Button color="red" onClick={() => setIsDeleteDialogOpen(true)}>
+                Delete
+              </Button>
+            </>
           ) : (
             <></>
           )}

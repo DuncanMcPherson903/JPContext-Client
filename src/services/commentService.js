@@ -4,16 +4,14 @@ export const getCommentsByVocabularyId = async (vocabularyId) => {
   return get(`/vocabulary/${vocabularyId}/comments`);
 }
 
-export const createComment = async (exampleData) => {
-  return post('/comment', exampleData);
+export const createComment = async (commentData) => {
+  return post('/comment', commentData);
 };
 
-export const deleteComment = async (exampleId) => {
-  return del(`/comment/${exampleId}`);
+export const updateComment = async (commentId, commentData) => {
+  return put(`/comment/${commentId}`, commentData);
 };
 
-export default {
-  getCommentsByVocabularyId,
-  createComment,
-  deleteComment
+export const deleteComment = async (commentId) => {
+  return del(`/comment/${commentId}`);
 };

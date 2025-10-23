@@ -10,12 +10,11 @@ import {
   Heading,
   Text,
   Flex,
-  Card,
   Box,
   Button,
   Dialog,
   Popover,
-  TextArea,
+  TextField,
 } from "@radix-ui/themes";
 import {
   deleteVocabulary,
@@ -23,18 +22,98 @@ import {
 } from "@/services/vocabularyService";
 import { getExamplesByVocabularyId } from "@/services/exampleServices";
 import { ChatBubbleIcon } from "@radix-ui/react-icons";
-import { getCommentsByVocabularyId } from "@/services/commentService";
+import {
+  createComment,
+  deleteComment,
+  getCommentsByVocabularyId,
+  updateComment,
+} from "@/services/commentService";
 import Comments from "@/components/Comments";
 
 export default function Home() {
   const { user, isAdmin } = useAuth();
+  const [formData, setFormData] = useState({
+    text: "",
+    userProfileId: 0,
+    vocabularyId: 0,
+  });
+  const [editCommentData, seteditCommentData] = useState({
+    text: "",
+  });
   const router = useRouter();
   const [vocabulary, setVocabulary] = useState([]);
   const [examples, setExamples] = useState([]);
   const params = useParams();
   const vocabularyId = params.id;
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isEditCommentDialogOpen, setIsEditCommentDialogOpen] = useState(false);
+  const [isDeleteCommentDialogOpen, setIsDeleteCommentDialogOpen] =
+    useState(false);
   const [comments, setComments] = useState([]);
+  const [editingComment, setEditingComment] = useState({});
+  const [commentToBeDeleted, setCommentToBeDeleted] = useState({});
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  const handleCommentChange = (e) => {
+    const { id, value } = e.target;
+    seteditCommentData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  const handleSubmitComment = async () => {
+    let tempFormData = formData;
+    tempFormData = {
+      ...tempFormData,
+      userProfileId: user.id,
+      vocabularyId: vocabularyId,
+    };
+    console.log(tempFormData);
+
+    await createComment(tempFormData);
+    fetchData();
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteVocabulary(vocabularyId);
+      router.push("/vocabulary");
+    } catch (err) {
+      console.error("Error deleting vocabulary:", err);
+      setError("Failed to delete vocabulary. Please try again.");
+      setIsDeleteDialogOpen(false);
+    }
+  };
+
+  const handleEditCommentDialogueBox = (comment) => {
+    setEditingComment(comment);
+    setIsEditCommentDialogOpen(true);
+  };
+
+  const handleDeleteCommentDialogueBox = (comment) => {
+    setCommentToBeDeleted(comment);
+    setIsDeleteCommentDialogOpen(true);
+  };
+
+  const handleEditComment = async () => {
+    let tempEditCommentData = editCommentData;
+    await updateComment(editingComment.id, tempEditCommentData);
+    fetchData();
+  };
+
+  const handleDeleteComment = async () => {
+    let tempDeleteCommentData = commentToBeDeleted;
+    await deleteComment(tempDeleteCommentData.id);
+    fetchData();
+  };
 
   const fetchData = async () => {
     const vocabularyData = await getVocabularyById(vocabularyId);
@@ -49,27 +128,14 @@ export default function Home() {
     fetchData();
   }, [vocabularyId]);
 
-  const handleDelete = async () => {
-    try {
-      await deleteVocabulary(vocabularyId);
-      router.push("/vocabulary");
-    } catch (err) {
-      console.error("Error deleting vocabulary:", err);
-      setError("Failed to delete vocabulary. Please try again.");
-      setIsDeleteDialogOpen(false);
-    }
-  };
-  
   const testBtn = () => {
-    console.log(comments)
-  }
+    console.log(editingCommentText);
+  };
 
   const vocabularyContent = (
     <>
       <Navbar />
-      <Button onClick={() => testBtn()}>
-        Test
-      </Button>
+      <Button onClick={() => testBtn()}>Test</Button>
       <Container size="4" py="9">
         <Flex direction="column" gap="6" align="center">
           <Heading size="9" mb="2">
@@ -77,9 +143,15 @@ export default function Home() {
           </Heading>
           <Text size="6">{vocabulary.translation}</Text>
           {isAdmin() ? (
+            <>
+            <Button onClick={() => router.push(`/vocabulary/${vocabularyId}/edit`)}>
+              Edit
+            </Button>
             <Button color="red" onClick={() => setIsDeleteDialogOpen(true)}>
               Delete
             </Button>
+            </>
+            
           ) : (
             <></>
           )}
@@ -98,6 +170,9 @@ export default function Home() {
           <Flex direction="column" gap="6" align="center">
             <Text>Subtitle: {example.subtitle}</Text>
             <Text>Translation: {example.englishSubtitle}</Text>
+            <Button onClick={() => router.push(`/examples/${example.id}`)}>
+              View
+            </Button>
           </Flex>
         </Flex>
       ))}
@@ -107,11 +182,7 @@ export default function Home() {
           <Heading size="8" mb="2">
             User Comments
           </Heading>
-          <Card>
-            <Comments 
-              comments = {comments}
-            />
-          </Card>
+
           <Popover.Root>
             <Popover.Trigger>
               <Button variant="soft">
@@ -122,19 +193,31 @@ export default function Home() {
             <Popover.Content width="360px">
               <Flex gap="3">
                 <Box flexGrow="1">
-                  <TextArea
-                    placeholder="Write a comment…"
-                    style={{ height: 80 }}
+                  <TextField.Root
+                    id="text"
+                    value={formData.text}
+                    onChange={handleChange}
+                    placeholder="Enter Comment..."
+                    required
                   />
                   <Flex gap="3" mt="3" justify="between">
                     <Popover.Close>
-                      <Button size="1">Comment</Button>
+                      <Button size="1" onClick={() => handleSubmitComment()}>
+                        Comment
+                      </Button>
                     </Popover.Close>
                   </Flex>
                 </Box>
               </Flex>
             </Popover.Content>
           </Popover.Root>
+          <Container>
+            <Comments
+              comments={comments}
+              onEditFunction={handleEditCommentDialogueBox}
+              onDeleteFunction={handleDeleteCommentDialogueBox}
+            />
+          </Container>
         </Flex>
       </Container>
 
@@ -156,6 +239,59 @@ export default function Home() {
             <Button color="red" onClick={handleDelete}>
               Delete
             </Button>
+          </Flex>
+        </Dialog.Content>
+      </Dialog.Root>
+
+      <Dialog.Root
+        open={isEditCommentDialogOpen}
+        onOpenChange={setIsEditCommentDialogOpen}
+      >
+        <Dialog.Content maxWidth="450px">
+          <Dialog.Title>Edit Comment</Dialog.Title>
+
+          <Flex direction="column" gap="3">
+            <label>
+              <TextField.Root
+                id="text"
+                onChange={handleCommentChange}
+                defaultValue={editingComment.text}
+              />
+            </label>
+          </Flex>
+
+          <Flex gap="3" mt="4" justify="end">
+            <Dialog.Close>
+              <Button variant="soft" color="gray">
+                Cancel
+              </Button>
+            </Dialog.Close>
+            <Dialog.Close>
+              <Button onClick={() => handleEditComment()}>Save</Button>
+            </Dialog.Close>
+          </Flex>
+        </Dialog.Content>
+      </Dialog.Root>
+
+      <Dialog.Root
+        open={isDeleteCommentDialogOpen}
+        onOpenChange={setIsDeleteCommentDialogOpen}
+      >
+        <Dialog.Content>
+          <Dialog.Title>Delete Comment</Dialog.Title>
+          <Dialog.Description size="2" mb="4">
+            Are you sure you want to delete this comment?
+          </Dialog.Description>
+
+          <Flex gap="3" mt="4" justify="end">
+            <Dialog.Close>
+              <Button variant="soft">Cancel</Button>
+            </Dialog.Close>
+            <Dialog.Close>
+              <Button color="red" onClick={handleDeleteComment}>
+                Delete
+              </Button>
+            </Dialog.Close>
           </Flex>
         </Dialog.Content>
       </Dialog.Root>
