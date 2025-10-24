@@ -1,0 +1,37 @@
+import { get, post, put, del } from './apiService';
+
+export const getAllVocabulary = async () => {
+  return get('/vocabulary');
+};
+
+export const searchAllVocabulary = async (searchQuery) => {
+  return get(`/vocabulary?searchQuery=${searchQuery}`);
+};
+
+export const getVocabularyById = async (vocabularyId) => {
+  return get(`/vocabulary/${vocabularyId}`);
+};
+
+export const getVocabularyByExampleId = async (exampleId) => {
+  return get(`/examples/${exampleId}/vocabulary`);
+}
+
+export const createVocabulary = async (vocabularyData) => {
+  return post('/vocabulary', vocabularyData);
+};
+
+export const updateVocabulary = async (vocabularyId, vocabularyData) => {
+  return put(`/vocabulary/${vocabularyId}`, vocabularyData);
+};
+
+export const deleteVocabulary = async (vocabularyId) => {
+  return del(`/vocabulary/${vocabularyId}`);
+};
+
+export default {
+  getAllVocabulary,
+  getVocabularyById,
+  createVocabulary,
+  deleteVocabulary,
+  getVocabularyByExampleId
+};

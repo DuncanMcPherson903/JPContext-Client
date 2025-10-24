@@ -1,0 +1,234 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../../../contexts/AuthContext";
+import Navbar from "../../../components/Navbar";
+import FeatureErrorBoundary from "../../../components/FeatureErrorBoundary";
+import {
+  Container,
+  Heading,
+  Text,
+  Flex,
+  Card,
+  TextField,
+  Button,
+  Box,
+  Popover,
+  ScrollArea,
+} from "@radix-ui/themes";
+import { createExample } from "@/services/exampleServices";
+import {
+  getVocabularyById,
+  searchAllVocabulary,
+} from "@/services/vocabularyService";
+import { PlusIcon } from "@radix-ui/react-icons";
+import {
+  AddedVocabCards,
+  SearchResultCards,
+} from "@/components/ExampleAddEditCards";
+
+export default function AddExample() {
+  const { user } = useAuth();
+  const router = useRouter();
+  const [formData, setFormData] = useState({
+    title: "",
+    source: "",
+    videoUrl: "",
+    subtitle: "",
+    englishSubtitle: "",
+    userProfileId: 0,
+    vocabularyId: [],
+  });
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [addedVocab, setAddedVocab] = useState([]);
+  const [vocabIdList, setVocabIdList] = useState([]);
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  const handleVocabSearch = async (e) => {
+    const { value } = e.target;
+    setSearchResults(await searchAllVocabulary(value));
+  };
+
+  const addVocabToForm = async (vocabId) => {
+    setVocabIdList((prev) => [...prev, vocabId]);
+    let newVocabList = await getVocabularyById(vocabId);
+    setAddedVocab((prev) => [...prev, newVocabList]);
+  };
+
+  const removeVocabFromForm = (vocabId) => {
+    setVocabIdList((prev) => [...prev].filter((item) => item !== vocabId));
+    setAddedVocab((prev) => [...prev].filter((item) => item.id !== vocabId));
+  };
+
+  const addedVocabIncludesSearchResult = (result) => {
+    const foundVocab = addedVocab.find((vocab) => vocab.id === result.id);
+    if (foundVocab == undefined) {
+      return false;
+    } else {
+      return true;
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    try {
+      let tempFormData = formData;
+      tempFormData = { ...tempFormData, vocabularyId: vocabIdList, userProfileId: user.id };
+      const newExample = await createExample(tempFormData);
+      router.push(`/examples/${newExample.id}`);
+    } catch (err) {
+      console.error("Error adding example:", err);
+      setError("Failed to add example. Please try again.");
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <FeatureErrorBoundary featureName="AddExample">
+      <>
+        <Navbar />
+        <Container size="2" py="9">
+          <Card>
+            <Flex direction="column" gap="5" p="4">
+              <Heading size="6" align="center">
+                Add a New Example
+              </Heading>
+
+              {error && (
+                <Text color="red" size="2">
+                  {error}
+                </Text>
+              )}
+
+              <form onSubmit={handleSubmit}>
+                <Flex direction="column" gap="4">
+                  <Box>
+                    <Text as="label" size="2" mb="1" htmlFor="title">
+                      Title
+                    </Text>
+                    <TextField.Root
+                      id="title"
+                      value={formData.title}
+                      onChange={handleChange}
+                      placeholder="Enter title"
+                      required
+                    />
+                  </Box>
+
+                  <Box>
+                    <Text as="label" size="2" mb="1" htmlFor="source">
+                      Source
+                    </Text>
+                    <TextField.Root
+                      id="source"
+                      value={formData.source}
+                      onChange={handleChange}
+                      placeholder="Enter name of source"
+                      required
+                    />
+                  </Box>
+
+                  <Box>
+                    <Text as="label" size="2" mb="1" htmlFor="videoUrl">
+                      Video URL
+                    </Text>
+                    <TextField.Root
+                      id="videoUrl"
+                      value={formData.videoUrl}
+                      onChange={handleChange}
+                      placeholder="Enter video URL"
+                    />
+                  </Box>
+
+                  <Box>
+                    <Text as="label" size="2" mb="1" htmlFor="subtitle">
+                      Subtitle
+                    </Text>
+                    <TextField.Root
+                      id="subtitle"
+                      value={formData.subtitle}
+                      onChange={handleChange}
+                      placeholder="Enter Japanese subtitle"
+                      required
+                    />
+                  </Box>
+
+                  <Box>
+                    <Text as="label" size="2" mb="1" htmlFor="englishSubtitle">
+                      English Subtitle
+                    </Text>
+                    <TextField.Root
+                      id="englishSubtitle"
+                      value={formData.englishSubtitle}
+                      onChange={handleChange}
+                      placeholder="Enter English subtitle"
+                      required
+                    />
+                  </Box>
+
+                  <Popover.Root>
+                    <Popover.Trigger>
+                      <Button variant="soft">
+                        <PlusIcon width="16" height="16" />
+                        Add Vocabulary
+                      </Button>
+                    </Popover.Trigger>
+                    <Popover.Content width="360px">
+                      <TextField.Root
+                        id="example"
+                        onChange={handleVocabSearch}
+                        placeholder="Search vocabulary…"
+                      ></TextField.Root>
+                      <ScrollArea
+                        type="always"
+                        scrollbars="vertical"
+                        style={{ height: 180 }}
+                      >
+                        <SearchResultCards
+                          searchResults={searchResults}
+                          addedVocabCheck={addedVocabIncludesSearchResult}
+                          addVocabFunction={addVocabToForm}
+                        />
+                      </ScrollArea>
+                    </Popover.Content>
+                  </Popover.Root>
+                  <ScrollArea type="always" scrollbars="vertical">
+                    <AddedVocabCards
+                      vocabList={addedVocab}
+                      removeVocab={removeVocabFromForm}
+                    />
+                  </ScrollArea>
+                  <Flex gap="3" mt="4">
+                    <Button type="submit" disabled={isLoading}>
+                      {isLoading ? "Adding Example..." : "Add Example"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="soft"
+                      onClick={() => router.push("/examples")}
+                    >
+                      Cancel
+                    </Button>
+                  </Flex>
+                </Flex>
+              </form>
+            </Flex>
+          </Card>
+        </Container>
+      </>
+    </FeatureErrorBoundary>
+  );
+}
