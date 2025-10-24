@@ -62,12 +62,12 @@ export default function Vocabulary() {
     <>
       <Navbar />
       <Container size="4" py="9">
-        <Flex direction="column" gap="6">
-          <Box>
+        <Flex direction="column" gap="6" align="center">
+
             <Heading size="9" mb="2">
               Vocabulary
             </Heading>
-          </Box>
+
 
           <Box>
             <TextField.Root

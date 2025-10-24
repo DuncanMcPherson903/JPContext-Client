@@ -57,7 +57,7 @@ export default function Example() {
     <>
       <Navbar />
       <Container size="4" py="9">
-        <Flex direction="column" gap="6">
+        <Flex direction="column" gap="6" align="center">
           <Box>
             <Heading size="9" mb="2">
               Examples

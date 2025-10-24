@@ -13,6 +13,7 @@ import {
   Card,
   Box,
   Button,
+  ScrollArea,
 } from "@radix-ui/themes";
 import Link from "next/link";
 import Image from "next/image";
@@ -39,14 +40,21 @@ export default function Home() {
   const homeContent = (
     <>
       <Navbar />
-      <Container size="4" py="9">
-        <Flex direction="column" gap="6">
-          <Box>
-            <Heading size="9" mb="2">
-              Vocabulary
-            </Heading>
-          </Box>
-          <Flex gap="6" wrap="wrap">
+      <Flex
+        direction="column"
+        gap="3"
+        align="center"
+        style={{ backgroundColor: "#eafdf8" }}
+      >
+        <Heading size="9" mb="5" mt="5">
+          Latest Vocabulary
+        </Heading>
+        <ScrollArea
+          type="always"
+          scrollbars="horizontal"
+          style={{ height: 130 }}
+        >
+          <Flex gap="6" wrap="nowrap" py="3">
             {vocabulary.map((vocabulary) => (
               <Link
                 href={`/vocabulary/${vocabulary.id}`}
@@ -54,38 +62,60 @@ export default function Home() {
                 style={{ textDecoration: "none" }}
               >
                 <Card style={{ flex: "1 1 300px" }}>
-                  <Flex direction="column" gap="3">
-                    <Heading size="4">{vocabulary.term}</Heading>
-                    <Text>{vocabulary.translation}</Text>
+                  <Flex direction="column" gap="3" wrap="nowrap" align="center">
+                    <Heading size="4" style={{whiteSpace: "nowrap"}}>{vocabulary.term}</Heading>
+                    <Text style={{whiteSpace: "nowrap"}}>{vocabulary.translation}</Text>
                   </Flex>
                 </Card>
               </Link>
             ))}
           </Flex>
+        </ScrollArea>
+      </Flex>
 
-          <Box>
-            <Heading size="9" mb="2">
-              Examples
-            </Heading>
+      <Flex
+        direction="column"
+        gap="3"
+        align="center"
+        style={{ backgroundColor: "#ddcad9" }}
+      >
+        <Heading size="9" mb="5" mt="5">
+          Latest Examples
+        </Heading>
+
+        <Flex
+        direction="column"
+        gap="6"
+        align="center"
+        style={{ backgroundColor: "#ddcad9" }}
+        p="5"
+      >
+
+        {examples.map((example) => (
+          <Box key={example.id} width="1000px">
+            <Card width="1000px">
+              <Flex direction="row" gap="9" align="center">
+                <iframe
+                  width="420"
+                  height="315"
+                  src={example.videoUrl}
+                ></iframe>
+
+                <Flex direction="column" gap="6" align="center">
+                  <Text size="7">Subtitle: {example.subtitle}</Text>
+                  <Text size="7">Translation: {example.englishSubtitle}</Text>
+                  <Button
+                    onClick={() => router.push(`/examples/${example.id}`)}
+                  >
+                    View
+                  </Button>
+                </Flex>
+              </Flex>
+            </Card>
           </Box>
-          <Flex gap="6" wrap="wrap">
-            {examples.map((example) => (
-              <Link
-                href={`/examples/${example.id}`}
-                key={example.id}
-                style={{ textDecoration: "none" }}
-              >
-                <Card style={{ flex: "1 1 300px" }}>
-                  <Flex direction="column" gap="3">
-                    <Heading size="4">{example.title}</Heading>
-                    <Text>Source: {example.source}</Text>
-                  </Flex>
-                </Card>
-              </Link>
-            ))}
-          </Flex>
-        </Flex>
-      </Container>
+        ))}
+      </Flex>
+      </Flex>
     </>
   );
 

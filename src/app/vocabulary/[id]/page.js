@@ -15,6 +15,8 @@ import {
   Dialog,
   Popover,
   TextField,
+  Card,
+  Inset,
 } from "@radix-ui/themes";
 import {
   deleteVocabulary,
@@ -128,92 +130,111 @@ export default function Home() {
     fetchData();
   }, [vocabularyId]);
 
-
   const vocabularyContent = (
     <>
       <Navbar />
-      <Container size="4" py="9">
+      <Container size="4" py="9" style={{ backgroundColor: "#eafdf8" }}>
         <Flex direction="column" gap="6" align="center">
           <Heading size="9" mb="2">
             {vocabulary.term}
           </Heading>
-          <Text size="6">{vocabulary.translation}</Text>
+          <Text size="6">Translation: {vocabulary.translation}</Text>
+          <Text size="6">Pronunciation: {vocabulary.pronunciation}</Text>
           {isAdmin() ? (
-            <>
-            <Button onClick={() => router.push(`/vocabulary/${vocabularyId}/edit`)}>
-              Edit
-            </Button>
-            <Button color="red" onClick={() => setIsDeleteDialogOpen(true)}>
-              Delete
-            </Button>
-            </>
-            
+            <Flex direction="row" gap="3">
+              <Button
+                onClick={() => router.push(`/vocabulary/${vocabularyId}/edit`)}
+              >
+                Edit
+              </Button>
+              <Button color="red" onClick={() => setIsDeleteDialogOpen(true)}>
+                Delete
+              </Button>
+            </Flex>
           ) : (
             <></>
           )}
-
-          <Box>
-            <Heading size="8" mb="2">
-              Examples
-            </Heading>
-          </Box>
         </Flex>
       </Container>
+      <Flex
+        direction="column"
+        gap="6"
+        align="center"
+        style={{ backgroundColor: "#ddcad9" }}
+        p="5"
+      >
+        <Heading size="8" mb="2">
+          Examples
+        </Heading>
 
-      {examples.map((example) => (
-        <Flex key={example.id} direction="row" gap="6" align="center">
-          <iframe width="420" height="315" src={example.videoUrl}></iframe>
-          <Flex direction="column" gap="6" align="center">
-            <Text>Subtitle: {example.subtitle}</Text>
-            <Text>Translation: {example.englishSubtitle}</Text>
-            <Button onClick={() => router.push(`/examples/${example.id}`)}>
-              View
-            </Button>
-          </Flex>
-        </Flex>
-      ))}
+        {examples.map((example) => (
+          <Box key={example.id} width="1000px">
+            <Card width="1000px">
+              <Flex direction="row" gap="9" align="center">
+                <iframe
+                  width="420"
+                  height="315"
+                  src={example.videoUrl}
+                ></iframe>
 
-      <Container>
+                <Flex direction="column" gap="6" align="center">
+                  <Text size="7">Subtitle: {example.subtitle}</Text>
+                  <Text size="7">Translation: {example.englishSubtitle}</Text>
+                  <Button
+                    onClick={() => router.push(`/examples/${example.id}`)}
+                  >
+                    View
+                  </Button>
+                </Flex>
+              </Flex>
+            </Card>
+          </Box>
+        ))}
+      </Flex>
+
+      <Container size="4" py="9" style={{ backgroundColor: "#eafdf8" }}>
         <Flex direction="column" gap="6" align="center">
           <Heading size="8" mb="2">
             User Comments
           </Heading>
-
           <Popover.Root>
-            <Popover.Trigger>
-              <Button variant="soft">
-                <ChatBubbleIcon width="16" height="16" />
-                Comment
-              </Button>
-            </Popover.Trigger>
-            <Popover.Content width="360px">
-              <Flex gap="3">
-                <Box flexGrow="1">
-                  <TextField.Root
-                    id="text"
-                    value={formData.text}
-                    onChange={handleChange}
-                    placeholder="Enter Comment..."
-                    required
-                  />
-                  <Flex gap="3" mt="3" justify="between">
-                    <Popover.Close>
-                      <Button size="1" onClick={() => handleSubmitComment()}>
-                        Comment
-                      </Button>
-                    </Popover.Close>
-                  </Flex>
-                </Box>
-              </Flex>
-            </Popover.Content>
-          </Popover.Root>
-          <Container>
-            <Comments
-              comments={comments}
-              onEditFunction={handleEditCommentDialogueBox}
-              onDeleteFunction={handleDeleteCommentDialogueBox}
-            />
-          </Container>
+              <Popover.Trigger>
+                <Button variant="soft">
+                  <ChatBubbleIcon width="16" height="16" />
+                  Comment
+                </Button>
+              </Popover.Trigger>
+              <Popover.Content width="360px">
+                <Flex gap="3">
+                  <Box flexGrow="1">
+                    <TextField.Root
+                      id="text"
+                      value={formData.text}
+                      onChange={handleChange}
+                      placeholder="Enter Comment..."
+                      required
+                    />
+                    <Flex gap="3" mt="3" justify="between">
+                      <Popover.Close>
+                        <Button size="1" onClick={() => handleSubmitComment()}>
+                          Comment
+                        </Button>
+                      </Popover.Close>
+                    </Flex>
+                  </Box>
+                </Flex>
+              </Popover.Content>
+            </Popover.Root>
+
+          <Box width="1000px">
+            <Flex direction="column" gap="3">
+              <Comments
+                comments={comments}
+                onEditFunction={handleEditCommentDialogueBox}
+                onDeleteFunction={handleDeleteCommentDialogueBox}
+              />
+            </Flex>
+          </Box>
         </Flex>
       </Container>
 

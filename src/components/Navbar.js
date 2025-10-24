@@ -14,7 +14,7 @@ import {
 } from "@radix-ui/themes";
 
 const Navbar = () => {
-  const { user, isAdmin} = useAuth();
+  const { user, isAdmin } = useAuth();
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -35,7 +35,8 @@ const Navbar = () => {
         borderBottom: "1px solid var(--gray-5)",
         position: "sticky",
         top: 0,
-        backgroundColor: "white",
+        backgroundColor: "#313131",
+        color: "white",
         zIndex: 10,
       }}
     >
@@ -69,24 +70,31 @@ const Navbar = () => {
         {user ? (
           <DropdownMenu.Root>
             <DropdownMenu.Trigger>
-              <Button variant="ghost">
+              <Button
+                variant="ghost"
+                style={{
+                  backgroundColor: "#B4B4B4",
+                  color: "black",
+                }}
+              >
                 <Flex align="center" gap="2">
                   <Avatar
                     size="2"
                     src={user.imageUrl || ""}
-                    fallback={user.firstName?.charAt(0) || "U"}
+                    fallback={user.username?.charAt(0) || "U"}
                     radius="full"
+                    style={{
+                      backgroundColor: "#313131",
+                    }}
                   />
-                  <Text>
-                    {user.firstName} {user.lastName}
-                  </Text>
+                  <Text>{user.username}</Text>
                 </Flex>
               </Button>
             </DropdownMenu.Trigger>
             <DropdownMenu.Content>
               <DropdownMenu.Item>
                 <Link href="/profile" passHref style={{ width: "100%" }}>
-                  Profile
+                  Update Profile
                 </Link>
               </DropdownMenu.Item>
               <DropdownMenu.Separator />

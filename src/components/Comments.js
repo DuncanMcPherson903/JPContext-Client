@@ -23,23 +23,29 @@ const Comments = ({ comments, onEditFunction, onDeleteFunction }) => {
     return <></>;
   }
   return comments.map((comment) => (
-    <Flex key={comment.id} direction="row" gap="3">
-      <Text>{comment.username}</Text>
-      <Card>
-        <Flex direction="row" gap="5" p="4">
-          <Text>{comment.text}</Text>
-          {isAdmin() || user.username == comment.username ? (
-            <>
-              <Button onClick={() => onEditFunction(comment)}>Edit</Button>
-              <Button color="red" onClick={() => onDeleteFunction(comment)}>
-                Delete
-              </Button>
-            </>
-          ) : (
-            <></>
-          )}
-        </Flex>
+    <Flex key={comment.id} direction="row" gap="3" align="center">
+      <Box width="80px">
+        <Text>{comment.username}:</Text>
+      </Box>
+      
+      <Card
+        style={{
+          height: "50px",
+          width: "800px",
+        }}
+      >
+        <Text>{comment.text}</Text>
       </Card>
+      {isAdmin() || user.username == comment.username ? (
+        <>
+          <Button onClick={() => onEditFunction(comment)}>Edit</Button>
+          <Button color="red" onClick={() => onDeleteFunction(comment)}>
+            Delete
+          </Button>
+        </>
+      ) : (
+        <></>
+      )}
     </Flex>
   ));
 };

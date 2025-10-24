@@ -30,7 +30,7 @@ export const AddedVocabCards = ({ vocabList, removeVocab }) => {
       <Flex direction="column" gap="3">
         <Heading size="4">{result.term}</Heading>
         <Text>{result.translation}</Text>
-        <Button type="button" onClick={() => removeVocab(result.id)}>
+        <Button type="button" color="red" onClick={() => removeVocab(result.id)}>
           Remove
         </Button>
       </Flex>

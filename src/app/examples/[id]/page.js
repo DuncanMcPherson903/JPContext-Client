@@ -56,13 +56,14 @@ export default function Home() {
   const vocabularyContent = (
     <>
       <Navbar />
-      <Container size="4" py="9">
+      <Container size="4" py="9" style={{ backgroundColor: "#eafdf8" }}>
         <Flex direction="column" gap="6" align="center">
           <Heading size="9" mb="2">
             {example.title}
           </Heading>
+          <Text size="6">Source: {example.source}</Text>
           {isAdmin() || user?.id == example.userProfileId ? (
-            <>
+            <Flex direction="row" gap="3">
               <Button
                 onClick={() => router.push(`/examples/${exampleId}/edit`)}
               >
@@ -71,18 +72,30 @@ export default function Home() {
               <Button color="red" onClick={() => setIsDeleteDialogOpen(true)}>
                 Delete
               </Button>
-            </>
+            </Flex>
           ) : (
             <></>
           )}
         </Flex>
       </Container>
-      <Flex direction="row" gap="6" align="center">
-        <iframe width="420" height="315" src={example.videoUrl}></iframe>
-        <Flex direction="column" gap="6" align="center">
-          <Text>Subtitle: {example.subtitle}</Text>
-          <Text>Translation: {example.englishSubtitle}</Text>
-        </Flex>
+      <Flex
+        direction="column"
+        gap="6"
+        align="center"
+        style={{ backgroundColor: "#ddcad9" }}
+        p="5"
+      >
+        <Box key={example.id} width="1000px">
+          <Card width="1000px">
+            <Flex direction="row" gap="9" align="center">
+              <iframe width="420" height="315" src={example.videoUrl}></iframe>
+              <Flex direction="column" gap="6" align="center">
+                <Text size="7">Subtitle: {example.subtitle}</Text>
+                <Text size="7">Translation: {example.englishSubtitle}</Text>
+              </Flex>
+            </Flex>
+          </Card>
+        </Box>
       </Flex>
 
       <Container size="4" py="9">
