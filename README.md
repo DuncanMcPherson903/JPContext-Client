@@ -1,5 +1,8 @@
 # JPContext-Client
 
+## About
+JPContext is a language learning application where Japanese language learners can further their education by listening to real examples of vocabulary terms being used in context by native speakers. 
+
 ## Getting Started
 
 ### Prerequisites
